@@ -1,0 +1,25 @@
+{
+  "name": "aiflow-demo",
+  "version": "1.0.0",
+  "description": "基础版AI Flow",
+  "private": true,
+  "packageManager": "pnpm@11.5.2",
+  "main": "index.js",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "docker:start": "docker-compose -f docker/docker-compose.yml -p aiflow up -d",
+    "docker:stop": "docker-compose -f docker/docker-compose.yml -p aiflow down"
+  },
+  "keywords": [],
+  "author": "wzp",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "turbo": "2.9.16",
+    "typescript": "6.0.3"
+  }
+}

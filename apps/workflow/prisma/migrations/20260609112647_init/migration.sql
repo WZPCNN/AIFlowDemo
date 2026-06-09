@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "users" ALTER COLUMN "name" DROP NOT NULL,
+ALTER COLUMN "emailVerified" DROP NOT NULL,
+ALTER COLUMN "verifyToken" DROP NOT NULL;

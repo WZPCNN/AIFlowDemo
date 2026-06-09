@@ -1,0 +1,30 @@
+{
+  "name": "@aiflow/ai-engine",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "AI 工作流引擎核心库",
+  "author": "wzp",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "langchain": "1.4.4",
+    "@langchain/openai": "1.4.7",
+    "@langchain/langgraph": "1.3.7",
+    "@langchain/ollama": "1.2.7",
+    "@qdrant/js-client-rest": "1.18.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.2",
+    "tsdown": "0.22.2",
+    "typescript": "6.0.3",
+    "vitest": "4.1.8"
+  }
+}

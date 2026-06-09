@@ -1,0 +1,179 @@
+// apps/workflow/prisma/schema.prisma
+// Prisma 数据库模型定义
+
+// 生成 Prisma Client 的配置
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+// 数据库连接配置
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// 用户表
+// ============================================
+model User {
+  // 用户唯一标识，使用 CUID（比UUID更短、有序）
+  id String @id @default(cuid())
+  // 用户邮箱，用于登录
+  email String @unique
+  // 密码哈希值（非明文）
+  password String
+  // 用户名称，用于显示
+  name String?
+  // 邮箱验证时间，null表示未验证
+  emailVerified DateTime?
+  // 邮箱验证令牌，用于验证邮箱中的链接
+  verifyToken String? @unique
+  // 创建日期，自动设置为当前时间
+  createAt DateTime @default(now())
+  // 更新日期，每次更新自动刷新
+  updatedAt DateTime @updatedAt
+  // 关系字段，一个用户有多个应用
+  apps App[]
+  // 关系字段，一个用户有多个知识库
+  knowledgeBases KnowledgeBase[]
+  // 数据库表名映射（默认是User，映射为users）
+  @@map("users")
+}
+
+// ============================================
+// 应用表
+// ============================================
+model App {
+  id String @id @default(cuid())
+  name String
+  description String?
+  icon String @default("🐧")
+  isPublished Boolean @default(false)
+  version Int @default(1)
+  // 外键，关联用户
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // 关系字段，一个应用有多个工作流
+  workflows Workflow[]
+  // 关系字段，一个应用有多个执行记录
+  executions WorkflowExecution[]
+  createAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // 索引，加速按用户查询
+  @@index([userId])
+  @@map("apps")
+}
+
+// ============================================
+// 工作流表
+// ============================================
+model Workflow {
+  id String @id @default(cuid())
+  name String
+  descriptions String?
+  // 节点数据，以JSON存储
+  // 包含节点的位置、类型、配置信息等
+  nodes Json
+  // 边数据， 以JSON存储
+  // 包含节点之间的连线关系
+  edges Json
+  version Int @default(1)
+  // 外键，关联应用表
+  appId String
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+  createAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([appId])
+  @@map("workflows")
+}
+
+// ============================================
+// 工作流执行记录表
+// ============================================
+model WorkflowExecution {
+  id String @id @default(cuid())
+  // 执行唯一标识，用于前端追踪
+  executionId String @unique
+  // 执行状态：RUNNING | SUCCESS| ERROR
+  status String @default("RUNNING")
+  // 输入参数（JSON格式）
+  inputs Json?
+  // 输出结果
+  outputs Json?
+  // 错误信息
+  error String?
+  // 执行耗时（ms）
+  duration Int?
+  // Token 消耗量
+  totalTokens Int @default(0)
+  // 外键，关联应用
+  appId String
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+  // 执行开始时间
+  startedAt DateTime @default(now())
+  // 执行完成时间
+  completedAt DateTime?
+  @@index([appId])
+  @@map("workflow_executions")
+}
+
+// ============================================
+// 知识库表
+// ============================================
+model KnowledgeBase {
+  id String @id @default(cuid())
+  name String
+  description String?
+  icon String @default("📙")
+  // 文本分块大小（字符数）
+  chunkSize Int @default(500)
+  // 分块重叠大小（字符数）
+  chunkOverlap Int @default(50)
+  // 检索模式：VECTOR | FULLTEXT | HYBRID
+  retrievalMode String @default("VECTOR")
+  // 向量检索权重（混合检索使用）
+  vectorWeight Float @default(0.7)
+  // 返回结果数量
+  topK Int @default(5)
+  // 相似度阈值
+  threshold Float @default(0.2)
+  // 文档数量统计
+  documentCount Int @default(0)
+  // 分块数量统计
+  chunkCount Int @default(0)
+  // 外键，关联到用户
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // 关系字段，一个知识库有多个文档
+  documents Document[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@map("knowledge_bases")
+}
+
+// ============================================
+// 文档表
+// ============================================
+model Document {
+  id String @id @default(cuid())
+  name String
+  originalName String
+  mimeType String
+  size Int
+  // 文档内容（纯文本，用于分块）
+  content String?
+  // 处理状态：PENDING | PROCESSING | COMPLETED |ERROR
+  status String @default("PENDING")
+  // 错误信息（处理失败时）
+  errorMessage String?
+  // 分块数量
+  chunkCount Int @default(0)
+  // 外键，关联到知识库
+  knowledgeBaseId String
+  knowledgeBase KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([knowledgeBaseId])
+  @@map("documents")
+}
