@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 处理其他错误（不要暴露内部错误信息）
-    console.log('注册失败！', err);
+    console.error('注册失败！', err);
     return NextResponse.json(
       { error: '注册失败，请稍后再试！' },
       { status: 500 },

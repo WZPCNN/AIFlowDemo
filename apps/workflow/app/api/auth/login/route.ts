@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: err.message }, { status: 400 });
     }
 
-    console.log('登陆失败：', err);
+    console.error('登陆失败：', err);
     NextResponse.json({ error: '登陆失败，请稍后重试！' }, { status: 500 });
   }
 }

@@ -10,7 +10,7 @@ import { verifyToken, generateTokens, setAuthCookies } from '@/lib/auth';
 export async function POST(request: NextRequest) {
   try {
     // 1. 从 Cookie 获取 Refresh Token
-    const refreshToken = request.cookies.get('refresh-token')?.value;
+    const refreshToken = request.cookies.get('refresh')?.value;
     if (!refreshToken) {
       return NextResponse.json({ error: '未登录' }, { status: 401 });
     }
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // 5. 返回成功
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.log('刷新 Token 失败：', err);
+    console.error('刷新 Token 失败：', err);
     return NextResponse.json(
       { error: '刷新失败，请重新登录' },
       { status: 500 },
